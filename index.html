@@ -101,6 +101,10 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .planner-note{width:100%;min-height:5rem;background:#fff;border:1.5px solid var(--light);border-left:3px solid var(--accent);padding:.6rem .8rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--text);resize:vertical;outline:none;border-radius:0 6px 6px 0;transition:border-color .2s,box-shadow .2s}
 .planner-note:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
 .planner-note::placeholder{color:rgba(0,0,0,.18)}
+.penny-label{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;font-weight:400;color:var(--dark);letter-spacing:.06em;margin:1.1rem 0 .4rem;border-top:1px solid var(--light);padding-top:1rem}
+.penny-area{width:100%;min-height:7rem;background:color-mix(in srgb,var(--gold) 12%,#fff);border:none;border-bottom:2px solid var(--accent);padding:.7rem .8rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;line-height:1.7;color:var(--text);resize:vertical;outline:none;border-radius:4px 4px 0 0;transition:background .2s,border-color .2s,box-shadow .2s}
+.penny-area:focus{background:#fff;border-bottom-color:var(--dark);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.penny-area::placeholder{color:color-mix(in srgb,var(--accent) 55%,transparent);font-style:italic}
 @media(min-width:700px){
   .planner-wrap{max-height:42vh}
 }
@@ -194,6 +198,8 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
         <div class="planner-grid" id="plannerGrid"></div>
         <div class="planner-note-label">Notes for today</div>
         <textarea class="planner-note" id="plannerNote" placeholder="Thoughts, reminders, intentions..." rows="3"></textarea>
+        <div class="penny-label">Penny for your thoughts...</div>
+        <textarea class="penny-area" id="pennyThoughts" placeholder="Write whatever is on your heart today..."></textarea>
       </div>
     </div>
   </main>
@@ -627,6 +633,10 @@ function buildPlanner(dayIdx){
   const note = document.getElementById('plannerNote');
   note.value = localStorage.getItem(plannerNoteKey(dayIdx)) || '';
   note.oninput = () => localStorage.setItem(plannerNoteKey(dayIdx), note.value);
+
+  const penny = document.getElementById('pennyThoughts');
+  penny.value = localStorage.getItem('gln_penny_' + dayIdx) || '';
+  penny.oninput = () => localStorage.setItem('gln_penny_' + dayIdx, penny.value);
 }
 
 // ── SERVICE WORKER ──
