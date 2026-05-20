@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Good Love Notebook ♡</title>
+<title>Asima's Lovebook ♡</title>
+<meta name="description" content="214 days of love, photos and plans — our private world.">
+<meta name="theme-color" content="#C9A0A0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Asima's Lovebook">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -54,7 +61,7 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 
 /* DAY VIEW */
 .day-view{height:100%;display:flex;flex-direction:column;overflow:hidden}
-.photo-wrap{flex:0 0 44%;position:relative;overflow:hidden;background:#111}
+.photo-wrap{flex:0 0 44%;position:relative;overflow:hidden;background:var(--light)}
 .photo-wrap img{width:100%;height:100%;object-fit:contain;transition:opacity .5s}
 .photo-overlay{display:none}
 /* Fallback gradient when no photo loads */
@@ -63,8 +70,8 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 /* Quote section below photo */
 .day-info{flex-shrink:0;padding:1rem 1.4rem .6rem;background:var(--bg);border-bottom:1px solid var(--light)}
 .day-date{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
-.day-quote{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;font-style:italic;line-height:1.45;color:var(--dark);margin-bottom:.4rem}
-.day-attr{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);opacity:.8}
+.day-quote{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;font-style:italic;line-height:1.45;color:var(--text);margin-bottom:.4rem}
+.day-attr{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dark);opacity:.9}
 
 /* NAV BAR */
 .nav-bar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.1rem;background:var(--bg);border-top:1px solid var(--light);flex-shrink:0}
@@ -142,7 +149,7 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 <div id="lock">
   <div class="lock-box">
     <div class="lock-icon">🌹</div>
-    <div class="lock-title">Good Love Notebook</div>
+    <div class="lock-title">Asima's Lovebook</div>
     <div class="lock-sub">Our Private World</div>
     <div class="lock-motto">Amor vincit omnia.</div>
     <input id="pwInput" class="lock-input" type="password" placeholder="Enter password" autocomplete="off">
@@ -154,7 +161,7 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 <!-- MAIN APP -->
 <div id="app">
   <header>
-    <div class="logo">Good Love<br>Notebook ♡</div>
+    <div class="logo">Asima's<br>Lovebook ♡</div>
     <div class="month-pills" id="monthPills"></div>
   </header>
   <main>
@@ -620,6 +627,13 @@ function buildPlanner(dayIdx){
   const note = document.getElementById('plannerNote');
   note.value = localStorage.getItem(plannerNoteKey(dayIdx)) || '';
   note.oninput = () => localStorage.setItem(plannerNoteKey(dayIdx), note.value);
+}
+
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>
+    navigator.serviceWorker.register('./sw.js').catch(()=>{})
+  );
 }
 
 // ── KEYBOARD ──

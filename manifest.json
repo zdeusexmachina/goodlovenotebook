@@ -1,0 +1,16 @@
+{
+  "name": "Asima's Lovebook",
+  "short_name": "Lovebook",
+  "description": "214 days of love, photos and plans — our private world.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF5F5",
+  "theme_color": "#C9A0A0",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
