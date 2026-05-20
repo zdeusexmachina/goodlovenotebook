@@ -78,6 +78,35 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
 /* QUOTE BADGE */
 .quote-badge{display:inline-block;font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;padding:.18rem .55rem;border-radius:20px;border:1px solid rgba(255,255,255,.32);margin-bottom:.4rem;color:rgba(255,255,255,.68)}
 
+/* PLANNER SECTION */
+.planner-wrap{background:var(--bg);border-top:2px solid var(--light);overflow-y:auto;flex-shrink:0}
+.planner-header{display:flex;align-items:center;justify-content:space-between;padding:.55rem 1.2rem .4rem;cursor:pointer;user-select:none}
+.planner-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;letter-spacing:.18em;color:var(--dark)}
+.planner-toggle{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
+.planner-body{padding:0 1rem .8rem;display:none}
+.planner-body.open{display:block}
+.planner-grid{display:grid;grid-template-columns:3.2rem 1fr;gap:.3rem .6rem;align-items:start}
+.time-label{font-size:.68rem;letter-spacing:.1em;color:var(--accent);padding-top:.45rem;text-align:right;font-family:'Cormorant Garamond',serif}
+.time-slot{width:100%;min-height:2rem;background:var(--light);border:none;border-bottom:1px solid var(--accent);border-radius:3px 3px 0 0;padding:.4rem .5rem;font-family:'Lato',sans-serif;font-size:.8rem;color:var(--text);resize:none;outline:none;transition:background .2s,border-color .2s;line-height:1.4;overflow:hidden}
+.time-slot:focus{background:#fff;border-bottom-color:var(--dark)}
+.time-slot::placeholder{color:rgba(0,0,0,.2);font-style:italic}
+.planner-note-label{grid-column:1/-1;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:.6rem 0 .2rem}
+.planner-note{width:100%;min-height:4rem;background:var(--light);border:none;border-left:2px solid var(--accent);padding:.5rem .6rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--text);resize:vertical;outline:none;border-radius:0 3px 3px 0;transition:background .2s}
+.planner-note:focus{background:#fff}
+.planner-note::placeholder{color:rgba(0,0,0,.2)}
+@media(min-width:700px){
+  .planner-wrap{max-height:40vh}
+  .planner-grid{grid-template-columns:3.5rem 1fr 3.5rem 1fr}
+}
+@media(min-width:1100px){
+  main{display:flex;flex-direction:row}
+  .day-view{flex:1;overflow:hidden}
+  .planner-wrap{width:320px;flex-shrink:0;border-top:none;border-left:2px solid var(--light);overflow-y:auto;max-height:100%}
+  .planner-body{display:block}
+  .planner-toggle{display:none}
+  .planner-grid{grid-template-columns:3.2rem 1fr}
+}
+
 /* CALENDAR BUTTON & DRAWER */
 #calBtn{position:fixed;right:1rem;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.85rem;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.18);display:none;align-items:center;justify-content:center;transition:transform .2s}
 #calBtn:hover{transform:translateY(-50%) scale(1.12)}
@@ -147,6 +176,18 @@ main{flex:1;overflow:hidden;display:flex;flex-direction:column}
           <div class="nav-daytxt">of 214 days</div>
         </div>
         <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+      </div>
+    </div>
+    <!-- PLANNER -->
+    <div class="planner-wrap" id="plannerWrap">
+      <div class="planner-header" onclick="togglePlanner()">
+        <div class="planner-title">My Day ✦ Planner</div>
+        <div class="planner-toggle" id="plannerToggle">▾ open</div>
+      </div>
+      <div class="planner-body" id="plannerBody">
+        <div class="planner-grid" id="plannerGrid"></div>
+        <div class="planner-note-label">Notes for today</div>
+        <textarea class="planner-note" id="plannerNote" placeholder="Thoughts, reminders, intentions..." rows="3"></textarea>
       </div>
     </div>
   </main>
@@ -467,6 +508,7 @@ function render(){
   document.body.className = MONTH_CLS[mo] || 'm6';
   document.querySelectorAll('.mpill').forEach(p=>
     p.classList.toggle('active', parseInt(p.dataset.m) === mo));
+  buildPlanner(cur);
 }
 
 function go(dir){
@@ -540,6 +582,48 @@ function init(){
   render();
 }
 
+// ── PLANNER ──
+const HOURS = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','24:00'];
+
+let plannerOpen = false;
+
+function togglePlanner(){
+  plannerOpen = !plannerOpen;
+  document.getElementById('plannerBody').classList.toggle('open', plannerOpen);
+  document.getElementById('plannerToggle').textContent = plannerOpen ? '▴ close' : '▾ open';
+}
+
+function plannerKey(dayIdx, slot){ return `gln_${dayIdx}_${slot}`; }
+function plannerNoteKey(dayIdx){ return `gln_note_${dayIdx}`; }
+
+function buildPlanner(dayIdx){
+  const grid = document.getElementById('plannerGrid');
+  grid.innerHTML = '';
+  HOURS.forEach(h => {
+    const lbl = document.createElement('div');
+    lbl.className = 'time-label';
+    lbl.textContent = h;
+    const area = document.createElement('textarea');
+    area.className = 'time-slot';
+    area.rows = 1;
+    area.placeholder = '...';
+    area.value = localStorage.getItem(plannerKey(dayIdx, h)) || '';
+    area.addEventListener('input', () => {
+      localStorage.setItem(plannerKey(dayIdx, h), area.value);
+      area.style.height = 'auto';
+      area.style.height = area.scrollHeight + 'px';
+    });
+    // Restore height
+    if(area.value){ setTimeout(()=>{ area.style.height='auto'; area.style.height=area.scrollHeight+'px'; },0); }
+    grid.appendChild(lbl);
+    grid.appendChild(area);
+  });
+  const note = document.getElementById('plannerNote');
+  note.value = localStorage.getItem(plannerNoteKey(dayIdx)) || '';
+  note.oninput = () => localStorage.setItem(plannerNoteKey(dayIdx), note.value);
+}
+
+// ── KEYBOARD ──
 // Keyboard
 document.addEventListener('keydown',e=>{
   if(document.getElementById('lock').style.opacity==='0'||!document.getElementById('lock').classList.contains('hidden'))return;
