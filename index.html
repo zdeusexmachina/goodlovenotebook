@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Good Love Notebook ♡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--accent:#C9A0A0;--bg:#FFF5F5;--text:#3A2A2A;--light:#FFE8E8;--dark:#8B5E5E;--gold:#D4AF8A}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);transition:background .9s,color .9s}
+
+/* LOCK SCREEN */
+#lock{position:fixed;inset:0;background:linear-gradient(135deg,#0d0508 0%,#2a0d1a 50%,#0d0508 100%);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .9s}
+#lock.hidden{opacity:0;pointer-events:none}
+.lock-box{text-align:center;color:#fff;max-width:340px;padding:2rem;width:90%}
+.lock-icon{font-size:2.8rem;margin-bottom:1.5rem;animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:1}}
+.lock-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;letter-spacing:.2em;margin-bottom:.35rem;color:#f0d8d8}
+.lock-sub{font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:#a08090;margin-bottom:.6rem}
+.lock-motto{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:#c0a0a8;margin-bottom:2rem;letter-spacing:.05em}
+.lock-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:4px;padding:.9rem 1.2rem;color:#fff;font-family:'Lato',sans-serif;font-size:.95rem;letter-spacing:.08em;outline:none;text-align:center;transition:border .3s;-webkit-text-security:disc}
+.lock-input::placeholder{color:rgba(255,255,255,.28)}
+.lock-input:focus{border-color:rgba(240,180,180,.55)}
+.lock-btn{margin-top:.9rem;width:100%;padding:.9rem;background:transparent;border:1px solid rgba(255,255,255,.22);color:#f0d8d8;font-family:'Cormorant Garamond',serif;font-size:1.05rem;letter-spacing:.2em;cursor:pointer;transition:all .3s;border-radius:4px}
+.lock-btn:hover{background:rgba(255,255,255,.07);border-color:rgba(240,180,180,.55)}
+.lock-err{color:#ff9999;font-size:.78rem;margin-top:.8rem;min-height:1.2em}
+
+/* MONTH THEMES */
+body.m6{--accent:#E8A0A8;--bg:#FFF5F7;--text:#3A2028;--light:#FFE8EE;--dark:#7A3848;--gold:#E8C4B0}
+body.m7{--accent:#E8A060;--bg:#FFFAF0;--text:#2A1A08;--light:#FFF0D8;--dark:#804018;--gold:#E8B870}
+body.m8{--accent:#50A8B8;--bg:#F0FAFC;--text:#082028;--light:#D0EEF8;--dark:#185870;--gold:#70C0D0}
+body.m9{--accent:#C09040;--bg:#FFFDF0;--text:#201800;--light:#FFF4CC;--dark:#705000;--gold:#C8A040}
+body.m10{--accent:#903838;--bg:#FFF5F0;--text:#200800;--light:#FFE0D8;--dark:#501010;--gold:#B06040}
+body.m11{--accent:#784898;--bg:#F9F0FC;--text:#180828;--light:#ECD0F8;--dark:#3A1060;--gold:#A870C8}
+body.m12{--accent:#3858A8;--bg:#F0F4FC;--text:#080E1E;--light:#C8D4F4;--dark:#0A1850;--gold:#6888C8}
+
+/* MAIN APP */
+#app{height:100%;display:none;flex-direction:column}
+#app.visible{display:flex}
+
+/* HEADER */
+header{padding:.75rem 1.4rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--light);flex-shrink:0;background:var(--bg);gap:.8rem}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;letter-spacing:.15em;color:var(--dark);white-space:nowrap}
+.month-pills{display:flex;gap:.28rem;overflow-x:auto;scrollbar-width:none;flex-shrink:1}
+.month-pills::-webkit-scrollbar{display:none}
+.mpill{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .65rem;border-radius:20px;border:1px solid var(--accent);color:var(--dark);cursor:pointer;white-space:nowrap;transition:all .2s;background:transparent}
+.mpill.active,.mpill:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* MAIN */
+main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* DAY VIEW */
+.day-view{height:100%;display:flex;flex-direction:column}
+.photo-wrap{flex:1;position:relative;overflow:hidden;min-height:0}
+.photo-wrap img{width:100%;height:100%;object-fit:cover;transition:opacity .5s}
+.photo-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.08) 55%,transparent 100%)}
+/* Fallback gradient when no photo loads */
+.photo-wrap.text-only{background:linear-gradient(160deg, var(--dark) 0%, var(--accent) 100%)}
+.photo-wrap.text-only img{display:none}
+.photo-wrap.text-only .photo-overlay{background:none}
+.day-info{position:absolute;bottom:0;left:0;right:0;padding:1.8rem 1.5rem 1rem;color:#fff}
+.day-date{font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;opacity:.72;margin-bottom:.45rem}
+.day-quote{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;font-style:italic;line-height:1.58;margin-bottom:.55rem}
+.day-attr{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;opacity:.58}
+
+/* NAV BAR */
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.1rem;background:var(--bg);border-top:1px solid var(--light);flex-shrink:0}
+.nav-btn{background:none;border:1px solid var(--accent);color:var(--dark);padding:.4rem 1rem;border-radius:20px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:.9rem;letter-spacing:.1em;transition:all .2s}
+.nav-btn:hover{background:var(--accent);color:#fff}
+.nav-btn:disabled{opacity:.28;cursor:default}
+.nav-center{text-align:center}
+.nav-daynum{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:var(--dark);line-height:1}
+.nav-daytxt{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-top:.1rem}
+
+/* QUOTE BADGE */
+.quote-badge{display:inline-block;font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;padding:.18rem .55rem;border-radius:20px;border:1px solid rgba(255,255,255,.32);margin-bottom:.4rem;color:rgba(255,255,255,.68)}
+
+/* CALENDAR BUTTON & DRAWER */
+#calBtn{position:fixed;right:1rem;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.85rem;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.18);display:none;align-items:center;justify-content:center;transition:transform .2s}
+#calBtn:hover{transform:translateY(-50%) scale(1.12)}
+#calDrawer{position:fixed;right:0;top:0;bottom:0;width:255px;background:var(--bg);border-left:1px solid var(--light);transform:translateX(100%);transition:transform .32s;overflow-y:auto;z-index:200;padding:1rem}
+#calDrawer.open{transform:translateX(0)}
+.cal-close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--dark);line-height:1}
+.cal-month-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;letter-spacing:.12em;color:var(--dark);margin:.6rem 0 .65rem;clear:both}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:.9rem}
+.cal-hdr{font-size:.6rem;color:var(--accent);text-align:center;padding:.15rem 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.72rem;border-radius:50%;cursor:pointer;transition:all .18s;color:var(--text)}
+.cal-day:hover{background:var(--light)}
+.cal-day.selected{background:var(--dark);color:#fff}
+
+/* RESPONSIVE */
+@media(min-width:700px){
+  .day-quote{font-size:1.6rem}
+  .day-info{padding:2.5rem 2.5rem 1.5rem}
+}
+@media(min-width:1100px){
+  #app{flex-direction:row}
+  header{flex-direction:column;width:195px;height:100%;border-right:1px solid var(--light);border-bottom:none;padding:1.5rem 1rem;justify-content:flex-start;align-items:flex-start;gap:1.8rem}
+  .logo{font-size:1.15rem}
+  .month-pills{flex-direction:column;overflow-x:visible;overflow-y:auto;width:100%}
+  .mpill{text-align:center}
+  main{flex:1}
+  .day-quote{font-size:1.9rem}
+}
+</style>
+</head>
+<body class="m6">
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+  <div class="lock-box">
+    <div class="lock-icon">🌹</div>
+    <div class="lock-title">Good Love Notebook</div>
+    <div class="lock-sub">Our Private World</div>
+    <div class="lock-motto">Amor vincit omnia.</div>
+    <input id="pwInput" class="lock-input" type="password" placeholder="Enter password" autocomplete="off">
+    <button class="lock-btn" onclick="checkPw()">Open ♡</button>
+    <div class="lock-err" id="lockErr"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header>
+    <div class="logo">Good Love<br>Notebook ♡</div>
+    <div class="month-pills" id="monthPills"></div>
+  </header>
+  <main>
+    <div class="day-view">
+      <div class="photo-wrap" id="photoWrap">
+        <img id="dayImg" src="" alt="">
+        <div class="photo-overlay"></div>
+        <div class="day-info">
+          <div class="quote-badge" id="quoteBadge"></div>
+          <div class="day-date" id="dayDate"></div>
+          <div class="day-quote" id="dayQuote"></div>
+          <div class="day-attr" id="dayAttr"></div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-btn" id="prevBtn" onclick="go(-1)">← Prev</button>
+        <div class="nav-center">
+          <div class="nav-daynum" id="navNum"></div>
+          <div class="nav-daytxt">of 214 days</div>
+        </div>
+        <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<button id="calBtn" onclick="toggleCal()" title="Browse all days">📅</button>
+<div id="calDrawer">
+  <button class="cal-close" onclick="toggleCal()">×</button>
+  <div id="calContent"></div>
+</div>
+
+<script>
+// ── PASSWORD ──
+const HASH = 'cd1b6a5917bc190e197cf726c2d79e11b663c027c3fc364bbacdab774410fe21';
+const SALT = 'goodlovenotebook2026';
+
+async function sha256(s){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPw()});
+
+async function checkPw(){
+  const val = document.getElementById('pwInput').value;
+  const h = await sha256(val + SALT);
+  if(h === HASH){
+    const lock = document.getElementById('lock');
+    lock.classList.add('hidden');
+    const app = document.getElementById('app');
+    app.classList.add('visible');
+    document.getElementById('calBtn').style.display='flex';
+    init();
+    setTimeout(()=>lock.remove(),950);
+  } else {
+    const err = document.getElementById('lockErr');
+    err.textContent='Incorrect password. Try again.';
+    document.getElementById('pwInput').value='';
+    setTimeout(()=>err.textContent='',2500);
+  }
+}
+
+// ── DATA ──
+// Each entry: [date, photo_filename_or_null, quote, attribution, badge]
+// badge: 'From Zlatko ♡' | 'Love' | 'Motivation' | 'Dance ♡' | 'Latin' | 'Greek'
+const P = 'photos/';
+
+const DAYS = [
+// ── JUNE ──────────────────────────────────────────────────
+['June 1, 2026','IMG_20250518_145411.jpg','You are my today and all of my tomorrows.','Leo Christopher','Love'],
+['June 2, 2026','IMG_20250411_203117.jpg','The secret of getting ahead is getting started. And you have never once been afraid to begin.','Mark Twain','Motivation'],
+['June 3, 2026','IMG_20250408_204317.jpg','May we always find our way back to laughter, the way we always do.','From Zlatko','From Zlatko ♡'],
+['June 4, 2026','IMG_20250407_195716.jpg','In all the world, there is no heart for me like yours.','Maya Angelou','Love'],
+['June 5, 2026','IMG_20250405_145240.jpg','Fortis fortuna adiuvat — Fortune favors the brave. You are brave. Always have been.','Terence','Latin'],
+['June 6, 2026','IMG_20250404_184826.jpg','Every summer with you feels like the beginning of everything good.','From Zlatko','From Zlatko ♡'],
+['June 7, 2026','IMG_20250329_222130.jpg','I love you not only for what you are, but for what I am when I am with you.','','Love'],
+['June 8, 2026','IMG_20250329_161916.jpg','Carpe diem — Seize this day. It was made for you.','Horace','Latin'],
+['June 9, 2026','IMG_20250329_161832.jpg','You make the ordinary days feel like celebrations.','From Zlatko','From Zlatko ♡'],
+['June 10, 2026','IMG_20250329_161701.jpg','You are the finest, loveliest, tenderest person I have ever known.','F. Scott Fitzgerald','Love'],
+['June 11, 2026','IMG_20250327_212249.jpg','She believed she could, so she did.','R.S. Grey','Motivation'],
+['June 12, 2026','IMG_20250320_213331.jpg','I am proud of you every single day. Don\'t ever forget that.','From Zlatko','From Zlatko ♡'],
+['June 13, 2026','IMG_20250320_213306.jpg','You have the heart of Athena — wise, fearless, full of grace, and brilliantly strong.','Greek Mythology','Greek'],
+['June 14, 2026','IMG_20250318_205102.jpg','You are braver than you believe, stronger than you seem, smarter than you think.','A.A. Milne','Motivation'],
+['June 15, 2026','IMG_20250315_191321.jpg','May we continue to stay up too late talking about everything and nothing.','From Zlatko','From Zlatko ♡'],
+['June 16, 2026','IMG_20250314_213028.jpg','To love and be loved is to feel the sun from both sides.','David Viscott','Love'],
+['June 17, 2026','IMG_20250314_192856.jpg','The future belongs to those who believe in the beauty of their dreams.','Eleanor Roosevelt','Motivation'],
+['June 18, 2026','IMG_20250309_142604.jpg','I fall in love with you more when I watch you do the things you love.','From Zlatko','From Zlatko ♡'],
+['June 19, 2026','IMG_20250308_162701.jpg','You are my sun, my moon, and all my stars.','E.E. Cummings','Love'],
+['June 20, 2026','IMG_20250131_194529.jpg','It always seems impossible until it\'s done. You know this better than anyone.','Nelson Mandela','Motivation'],
+['June 21, 2026','IMG_20250131_193102.jpg','Your smile is still the most beautiful thing I\'ve ever seen. And I\'ve seen a lot of beautiful things.','From Zlatko','From Zlatko ♡'],
+['June 22, 2026','IMG-20250131-WA0175.jpg','I swear I couldn\'t love you more than I do right now, and yet I know I will tomorrow.','Leo Christopher','Love'],
+['June 23, 2026','65000.jpg','Per aspera ad astra — Through hardship to the stars. You are already among them.','Seneca','Latin'],
+['June 24, 2026','65001.jpg','Thank you for choosing me, every single day.','From Zlatko','From Zlatko ♡'],
+['June 25, 2026','65002.jpg','You are my heart, my life, my one and only thought.','Arthur Conan Doyle','Love'],
+['June 26, 2026','65003.jpg','Be the energy you want to attract — and you attract the most beautiful kind.','','Motivation'],
+['June 27, 2026','65004.jpg','May we continue to cook our favourite meals together and make a beautiful mess of the kitchen.','From Zlatko','From Zlatko ♡'],
+['June 28, 2026','65005.jpg','I want to be your last everything.','','Love'],
+['June 29, 2026','65006.jpg','Keep going. Everything you need is coming to you.','','Motivation'],
+['June 30, 2026','65007.jpg','One month of this notebook. One lifetime more with you ahead. Thank you for existing.','From Zlatko','From Zlatko ♡'],
+
+// ── JULY ──────────────────────────────────────────────────
+['July 1, 2026','IMG_20250712_125441.jpg','You make my heart smile — you have from the very first moment.','','Love'],
+['July 2, 2026','IMG_20250712_173617.jpg','The best is yet to come. I promise.','','Motivation'],
+['July 3, 2026','IMG_20250713_090936.jpg','I love how free you look when you laugh. Don\'t ever hold that back.','From Zlatko','From Zlatko ♡'],
+['July 4, 2026','IMG_20250717_201144.jpg','I look at you and see the rest of my life in front of my eyes.','','Love'],
+['July 5, 2026','IMG_20250717_215559.jpg','Alis volat propriis — She flies with her own wings. That is you, every single day.','Latin Proverb','Latin'],
+['July 6, 2026','IMG_20250721_202533.jpg','May we continue to explore new places together — always curious, always together.','From Zlatko','From Zlatko ♡'],
+['July 7, 2026','IMG_20250725_220612.jpg','Whatever our souls are made of, yours and mine are the same.','Emily Brontë','Love'],
+['July 8, 2026','IMG_20250725_221806.jpg','Every day is a new beginning. Take a deep breath. You were made for it.','','Motivation'],
+['July 9, 2026','IMG_20250726_000751.jpg','Being with you in the sunshine is my favourite feeling in the world.','From Zlatko','From Zlatko ♡'],
+['July 10, 2026','IMG_20250726_210141.jpg','I am so utterly in love with you.','','Love'],
+['July 11, 2026','IMG_20250729_193145.jpg','Happiness is not something ready-made. It comes from your own actions — and yours create so much joy.','Dalai Lama','Motivation'],
+['July 12, 2026','IMG_20250729_213914.jpg','May we continue to dance through life like this — freely, joyfully, completely ourselves.','From Zlatko','From Zlatko ♡'],
+['July 13, 2026','65008.jpg','You are the person I want to be silly with forever.','','Love'],
+['July 14, 2026','65009.jpg','Like the goddess Artemis — free, fierce, luminous beneath the moon. That is you.','Greek Mythology','Greek'],
+['July 15, 2026','65010.jpg','Our summer stories are my favourite ones to tell.','From Zlatko','From Zlatko ♡'],
+['July 16, 2026','65011.jpg','I never want to stop making memories with you.','','Love'],
+['July 17, 2026','65012.jpg','You are stronger than you know. Braver than you feel. Smarter than you think. Believe it.','','Motivation'],
+['July 18, 2026','65013.jpg','May we continue to have those golden summer days that never seem to end.','From Zlatko','From Zlatko ♡'],
+['July 19, 2026','65014.jpg','You are the best thing that\'s ever been mine.','Taylor Swift','Love'],
+['July 20, 2026','65015.jpg','Amor vincit omnia — Love conquers all. And our love conquers everything.','Virgil','Latin'],
+['July 21, 2026','65016.jpg','I love every version of you — but this one, right now, is particularly spectacular.','From Zlatko','From Zlatko ♡'],
+['July 22, 2026','65017.jpg','My favourite place in all the world is next to you.','','Love'],
+['July 23, 2026','65018.jpg','Keep your face always toward the sunshine — shadows will fall behind you.','Walt Whitman','Motivation'],
+['July 24, 2026','65019.jpg','You make even the hottest days feel like the perfect temperature.','From Zlatko','From Zlatko ♡'],
+['July 25, 2026','65020.jpg','I choose you. Over and over. Without pause, without doubt, in a heartbeat.','','Love'],
+['July 26, 2026','65021.jpg','Be yourself — everyone else is already taken.','Oscar Wilde','Motivation'],
+['July 27, 2026','65022.jpg','May we continue to have evenings like this, with nowhere we need to be, just us.','From Zlatko','From Zlatko ♡'],
+['July 28, 2026','65023.jpg','In your smile I see something more beautiful than the stars.','Beth Revis','Love'],
+['July 29, 2026','65024.jpg','You are capable of more than you know. This chapter of your life will prove it.','','Motivation'],
+['July 30, 2026','65025.jpg','Every photo of us together is proof that good things do happen.','From Zlatko','From Zlatko ♡'],
+['July 31, 2026','65026.jpg','I love you to the moon and back — and the moon is very, very far.','','Love'],
+
+// ── AUGUST ──────────────────────────────────────────────────
+['August 1, 2026','IMG_20250802_154418.jpg','August — golden and warm and yours. Enjoy every second of it.','From Zlatko','From Zlatko ♡'],
+['August 2, 2026','IMG_20250803_093034.jpg','I see how hard you work. I notice every single bit of it. You are extraordinary.','From Zlatko','From Zlatko ♡'],
+['August 3, 2026','IMG_20250803_093140.jpg','You are my greatest adventure.','','Love'],
+['August 4, 2026','65027.jpg','Be the reason someone smiles today. You already are.','','Motivation'],
+['August 5, 2026','65028.jpg','May we continue to create these little moments that become our biggest memories.','From Zlatko','From Zlatko ♡'],
+['August 6, 2026','65029.jpg','I would rather spend one lifetime with you than face all the ages of this world alone.','J.R.R. Tolkien','Love'],
+['August 7, 2026','65030.jpg','If it doesn\'t challenge you, it doesn\'t change you. And you have never shied from a challenge.','','Motivation'],
+['August 8, 2026','65031.jpg','I love the way your eyes light up when you talk about something you care about.','From Zlatko','From Zlatko ♡'],
+['August 9, 2026','65032.jpg','You are home to me.','','Love'],
+['August 10, 2026','65033.jpg','She carries the fire of Prometheus in her soul — and with it, she lights up every room she enters.','Greek Mythology','Greek'],
+['August 11, 2026','65034.jpg','Thank you for being the kind of person who makes everything better just by being there.','From Zlatko','From Zlatko ♡'],
+['August 12, 2026','65035.jpg','I am so proud to call you mine.','','Love'],
+['August 13, 2026','65036.jpg','You are a work of art — and you are still being made. The masterpiece is ongoing.','','Motivation'],
+['August 14, 2026','65037.jpg','May we continue to have these late summer moments where everything just feels right.','From Zlatko','From Zlatko ♡'],
+['August 15, 2026','65038.jpg','Every moment I spend with you is one I treasure.','','Love'],
+['August 16, 2026','65039.jpg','Be so good they can\'t ignore you. You already know how.','Steve Martin','Motivation'],
+['August 17, 2026','65040.jpg','You are the best dance trainer — the patience, the fire, the joy you pour into every student. That is a rare and beautiful gift.','From Zlatko','Dance ♡'],
+['August 18, 2026','65041.jpg','I love you not only for what you are, but for what I am when I am with you.','','Love'],
+['August 19, 2026','65042.jpg','She is clothed in strength and dignity and she laughs without fear of the future.','Proverbs 31:25','Motivation'],
+['August 20, 2026','65043.jpg','Watching you do the things you love is one of my absolute favourite things.','From Zlatko','From Zlatko ♡'],
+['August 21, 2026','65044.jpg','You are my favourite hello and my hardest goodbye.','','Love'],
+['August 22, 2026','64968.jpg','We must have perseverance and above all confidence in ourselves. You have both in abundance.','Marie Curie','Motivation'],
+['August 23, 2026','64969.jpg','May we continue to laugh at our inside jokes that no one else understands.','From Zlatko','From Zlatko ♡'],
+['August 24, 2026','64970.jpg','My soul recognises your soul. It always has.','','Love'],
+['August 25, 2026','64971.jpg','One small positive thought in the morning can change your whole day. Start with: I am enough.','','Motivation'],
+['August 26, 2026','64972.jpg','I love the way you approach life — with so much heart, so much grace, so much courage.','From Zlatko','From Zlatko ♡'],
+['August 27, 2026','IMG_20260425_211144_424.jpg','You are worth every mile and every moment.','','Love'],
+['August 28, 2026','IMG_20260430_144754_910.jpg','Dum spiro, spero — While I breathe, I hope. And I hope for so many beautiful things for you.','Cicero','Latin'],
+['August 29, 2026','IMG_20260504_220851_448.jpg','You are the best part of every story I will ever tell.','From Zlatko','From Zlatko ♡'],
+['August 30, 2026','IMG_20260512_222505_931.jpg','Look at everything you are capable of creating. The world is lucky to have you in it.','From Zlatko','From Zlatko ♡'],
+['August 31, 2026','IMG_20260512_222522_807.jpg','Another beautiful month. Here\'s to September — together, always.','From Zlatko','From Zlatko ♡'],
+
+// ── SEPTEMBER ──────────────────────────────────────────────────
+['September 1, 2026','IMG_20250920_183218_427.jpg','And suddenly you know: it\'s time to start something new and trust the magic of beginnings.','Meister Eckhart','Motivation'],
+['September 2, 2026','IMG_20250922_020150_495.jpg','You have this incredible ability to make the world softer. Don\'t ever lose that.','From Zlatko','From Zlatko ♡'],
+['September 3, 2026','IMG_20250922_020334_705.jpg','Autumn is here, and you somehow manage to be more beautiful in every season.','From Zlatko','From Zlatko ♡'],
+['September 4, 2026','IMG_20250923_161732_817.jpg','Growth is painful. Change is painful. But nothing is as painful as staying stuck. Keep moving.','Mandy Hale','Motivation'],
+['September 5, 2026','IMG_20250925_221756_521.jpg','Loving you is the easiest and best thing I have ever done.','From Zlatko','From Zlatko ♡'],
+['September 6, 2026','IMG_20250926_064041_429.jpg','Like Penelope — patient, brilliant, unbreakable. Her strength was legendary. So is yours.','Greek Mythology','Greek'],
+['September 7, 2026','IMG_20250928_224538_869.jpg','May we continue to have those long autumn walks where we solve everything and nothing.','From Zlatko','From Zlatko ♡'],
+['September 8, 2026','IMG_20250929_205030_863.jpg','I never knew what love was until you.','','Love'],
+['September 9, 2026','IMG_20250929_224014_131.jpg','Fall seven times, stand up eight. You have stood up every single time.','Japanese Proverb','Motivation'],
+['September 10, 2026','64973.jpg','Day 102. Here\'s what I know: I love you more than any words can hold.','From Zlatko','From Zlatko ♡'],
+['September 11, 2026','64974.jpg','Love is not just looking at each other — it\'s looking in the same direction.','Antoine de Saint-Exupéry','Love'],
+['September 12, 2026','64975.jpg','You are allowed to be both a masterpiece and a work in progress simultaneously.','Sophia Bush','Motivation'],
+['September 13, 2026','64976.jpg','I love watching the world change around us while we stay constant.','From Zlatko','From Zlatko ♡'],
+['September 14, 2026','64977.jpg','You make everything feel possible. That is not a small thing. That is everything.','','Love'],
+['September 15, 2026','64978.jpg','Acta non verba — Deeds, not words. You live this every single day.','Latin Proverb','Latin'],
+['September 16, 2026','64979.jpg','May we continue to make every season feel like our season.','From Zlatko','From Zlatko ♡'],
+['September 17, 2026','64980.jpg','In a sea of people, my eyes will always search for you.','','Love'],
+['September 18, 2026','IMG_20260517_205855_927.jpg','You are so much more than your struggles. You are everything they made you into.','','Motivation'],
+['September 19, 2026','IMG-20260319-WA0030.jpg','One of my favourite things about you is how much love you hold inside you.','From Zlatko','From Zlatko ♡'],
+['September 20, 2026','IMG-20260308-WA0099.jpg','Every day I love you more — more than yesterday, less than tomorrow.','','Love'],
+['September 21, 2026','IMG-20260308-WA0021.jpg','Aphrodite herself would envy the grace with which you move. But grace is only half your gift.','Greek Mythology','Greek'],
+['September 22, 2026','IMG_20260305_155806_244.jpg','You deserve every good thing that is coming your way.','From Zlatko','From Zlatko ♡'],
+['September 23, 2026','IMG_20260305_155754_172.jpg','I want to hold your hand in every season. In every version of our lives.','','Love'],
+['September 24, 2026','IMG_20260306_212741.jpg','Surround yourself with those who see greatness in you — even when you cannot see it yourself.','','Motivation'],
+['September 25, 2026','IMG_20260306_223906_487.jpg','May we continue to have those rainy evenings that somehow become perfect.','From Zlatko','From Zlatko ♡'],
+['September 26, 2026','IMG_20260311_171517_293.jpg','My love for you is a journey starting at forever and ending at never.','','Love'],
+['September 27, 2026','IMG_20260311_171748_184.jpg','Don\'t let yesterday take up too much of today.','Will Rogers','Motivation'],
+['September 28, 2026','IMG_20260311_171750_169.jpg','I am endlessly grateful that I get to be the one by your side.','From Zlatko','From Zlatko ♡'],
+['September 29, 2026','IMG_20260311_171752_504.jpg','You are my adventure and my safe place all at once.','','Love'],
+['September 30, 2026','IMG-20260228-WA0085.jpg','Autumn shows us how beautiful it is to let things go. Trust the season you are in.','','Motivation'],
+
+// ── OCTOBER ──────────────────────────────────────────────────
+['October 1, 2026','IMG_20251002_230042_731.jpg','I love the way you love — completely and without reservation.','From Zlatko','From Zlatko ♡'],
+['October 2, 2026','IMG_20251005_081455_348.jpg','October is the month for dreaming — so dream as big as you dare.','','Motivation'],
+['October 3, 2026','IMG_20251005_081500_608.jpg','May we continue to have those cozy evenings in, wrapped up together, nowhere to be.','From Zlatko','From Zlatko ♡'],
+['October 4, 2026','IMG_20251005_161846_110.jpg','You are my calm in every storm. My harbour. My home.','','Love'],
+['October 5, 2026','IMG_20251014_222135_876.jpg','You are not a drop in the ocean. You are the entire ocean in a drop.','Rumi','Motivation'],
+['October 6, 2026','IMG-20260228-WA0117.jpg','I see so much strength in you that you don\'t always see in yourself. Let me be your mirror.','From Zlatko','From Zlatko ♡'],
+['October 7, 2026','IMG-20260228-WA0167.jpg','When I count my blessings, I count you twice.','','Love'],
+['October 8, 2026','IMG_20260225_213734_013.jpg','Focus not on fighting the old, but on building the new. You are already building something beautiful.','Socrates','Motivation'],
+['October 9, 2026','IMG_20260225_224206_051.jpg','My favourite sound is your laugh. It always has been. It always will be.','From Zlatko','From Zlatko ♡'],
+['October 10, 2026','IMG_20260224_203727.jpg','You had me at hello and you will have me at every goodbye and every hello to come.','','Love'],
+['October 11, 2026','IMG_20260224_221719_049.jpg','In omnia paratus — Prepared for all things. That is exactly who you are.','Latin Proverb','Latin'],
+['October 12, 2026','IMG_20260222_224540_465.jpg','May we continue to dance together in the kitchen when no one is watching — that is my favourite dance.','From Zlatko','Dance ♡'],
+['October 13, 2026','IMG_20260221_182615_964.jpg','I promise you, as long as I have you, I have everything I need.','','Love'],
+['October 14, 2026','IMG_20260221_182618_194.jpg','You yourself, as much as anybody in the universe, deserve your love and affection.','Buddha','Motivation'],
+['October 15, 2026','IMG_20260219_115648_823.jpg','Half a year done. You have been incredible through every single day of it.','From Zlatko','From Zlatko ♡'],
+['October 16, 2026','IMG_20260219_115651_010.jpg','You are the only one I want beside me when I look up at the stars.','','Love'],
+['October 17, 2026','IMG_20260211_161144_585.jpg','Tough times never last, but tough people do. And you are one of the toughest people I know.','Robert Schuller','Motivation'],
+['October 18, 2026','IMG_20260211_161147_402.jpg','You have grown so much this year. I have had the privilege of watching every moment of it.','From Zlatko','From Zlatko ♡'],
+['October 19, 2026','IMG_20260210_225214_898.jpg','Being deeply loved gives you strength. Loving deeply gives you courage. You have both.','Lao Tzu','Love'],
+['October 20, 2026','IMG_20260208_204028_133.jpg','You are beautiful — inside and out, from the very first moment to this one right now.','','Motivation'],
+['October 21, 2026','IMG_20260208_195246.jpg','May we continue to be each other\'s biggest fans through absolutely all of it.','From Zlatko','From Zlatko ♡'],
+['October 22, 2026','IMG_20260203_075203_497.jpg','You are my home. Wherever you are, that is where I belong.','','Love'],
+['October 23, 2026','IMG_20260203_095819_239.jpg','Don\'t watch the clock; do what it does. Keep going. You are almost there.','Sam Levenson','Motivation'],
+['October 24, 2026','IMG_20260203_230914_103.jpg','I am so proud of the woman you are and the woman you are still becoming.','From Zlatko','From Zlatko ♡'],
+['October 25, 2026','IMG_20260131_134609.jpg','I love you more than all the words that have ever been written. And that is a lot of words.','','Love'],
+['October 26, 2026','IMG_20260130_174623.jpg','She is rare. She is fierce. She is kind. She is endlessly capable. She is you.','','Motivation'],
+['October 27, 2026','IMG_20260124_203454_110.jpg','May we continue to build something beautiful together — because we already are.','From Zlatko','From Zlatko ♡'],
+['October 28, 2026','IMG_20260124_141847.jpg','You are enough. You have always been enough. You will always be enough.','','Love'],
+['October 29, 2026','IMG_20260123_194332.jpg','The only person you should try to be better than is who you were yesterday.','','Motivation'],
+['October 30, 2026','IMG_20260123_194005.jpg','Day 152. I still choose you. Every single day. And I always will. — Zlatko','From Zlatko','From Zlatko ♡'],
+['October 31, 2026','IMG_20260121_183813.jpg','Every love story is beautiful, but ours — ours is my favourite.','','Love'],
+
+// ── NOVEMBER ──────────────────────────────────────────────────
+['November 1, 2026','IMG_20251101_000223_674.jpg','November. The month of gratitude. Today — and every day — I am grateful for you.','From Zlatko','From Zlatko ♡'],
+['November 2, 2026','IMG_20251102_222234_907.jpg','You are my person. In the softest, most permanent way imaginable.','','Love'],
+['November 3, 2026','IMG_20251103_214335_482.jpg','May we continue to be grateful together — for the small things, the big things, all things.','From Zlatko','From Zlatko ♡'],
+['November 4, 2026','IMG_20251103_214354_315.jpg','I didn\'t know what real love felt like until you showed me.','','Love'],
+['November 5, 2026','IMG_20251107_221247.jpg','Dum spiro, spero — While I breathe, I hope. And I hope only beautiful things for you.','Cicero','Latin'],
+['November 6, 2026','IMG_20251108_152710.jpg','I love how you make everything around you more beautiful just by being in it.','From Zlatko','From Zlatko ♡'],
+['November 7, 2026','IMG_20251111_203818.jpg','You are the reason I believe in love.','','Love'],
+['November 8, 2026','IMG_20251111_213436.jpg','The way you teach dance — the patience, the fire, the joy you give every student — you are the very best at what you do. Never doubt it.','From Zlatko','Dance ♡'],
+['November 9, 2026','IMG_20251113_203735.jpg','May we continue to dream big together, the way we always have.','From Zlatko','From Zlatko ♡'],
+['November 10, 2026','IMG_20251114_135856.jpg','Loving you feels like coming home after a very long journey.','','Love'],
+['November 11, 2026','IMG_20251115_200452.jpg','Never give up on a dream just because of the time it will take to accomplish it. Time passes anyway.','Earl Nightingale','Motivation'],
+['November 12, 2026','IMG_20251121_160940_312.jpg','You inspire me. Every single day. I hope you know that.','From Zlatko','From Zlatko ♡'],
+['November 13, 2026','IMG_20251122_152454.jpg','I would find you in any lifetime. In any world. Always you.','','Love'],
+['November 14, 2026','IMG_20251122_152457.jpg','You are not too much. You are not too little. You are exactly enough.','','Motivation'],
+['November 15, 2026','IMG_20251122_153049.jpg','May we continue to have those quiet moments where no words are needed between us.','From Zlatko','From Zlatko ♡'],
+['November 16, 2026','IMG_20251124_194822.jpg','Persephone survived the darkest season and returned to bloom. So can you. So do you.','Greek Mythology','Greek'],
+['November 17, 2026','IMG_20251124_194840.jpg','Sometimes the most productive thing you can do is rest. You have earned it.','','Motivation'],
+['November 18, 2026','IMG_20251125_145002_000.jpg','I am endlessly proud of you. Not just for what you do — but for who you are.','From Zlatko','From Zlatko ♡'],
+['November 19, 2026','IMG_20251125_153245.jpg','You are my favourite part of the whole wide world.','','Love'],
+['November 20, 2026','IMG_20251129_185745_798.jpg','You cannot pour from an empty cup. Take care of yourself first. Always.','','Motivation'],
+['November 21, 2026','IMG_20251130_181933.jpg','May we continue to be a team — through every season, every chapter, every version of life.','From Zlatko','From Zlatko ♡'],
+['November 22, 2026','IMG_20251130_200840.jpg','You are everything I never knew I always wanted.','','Love'],
+['November 23, 2026','IMG_20251130_235530_406.jpg','Stars cannot shine without darkness. You shine brilliantly.','','Motivation'],
+['November 24, 2026','IMG-20251108-WA0005.jpg','I love every little quirk about you. Especially the ones you try to hide from the world.','From Zlatko','From Zlatko ♡'],
+['November 25, 2026','IMG-20251113-WA0023.jpg','Of all the things I hold, you are my favourite. Always.','','Love'],
+['November 26, 2026','64981.jpg','Be thankful for what you have — you\'ll end up having more.','Oprah Winfrey','Motivation'],
+['November 27, 2026','64982.jpg','May we continue to have those spontaneous moments that become our very best memories.','From Zlatko','From Zlatko ♡'],
+['November 28, 2026','64983.jpg','Darling, you have no idea how rare you truly are.','','Love'],
+['November 29, 2026','64984.jpg','Take time to celebrate how far you have come. You have earned every bit of it.','','Motivation'],
+['November 30, 2026','64985.jpg','Day 183. Half a notebook filled. A lifetime more to go. Always and completely yours, Z. ♡','From Zlatko','From Zlatko ♡'],
+
+// ── DECEMBER ──────────────────────────────────────────────────
+['December 1, 2026','IMG_20251206_231243_575.jpg','The magic of December — and the greatest magic of all: you.','From Zlatko','From Zlatko ♡'],
+['December 2, 2026','IMG_20251208_190536_307.jpg','The best thing about the future is that it comes one day at a time. And each day is a gift.','Abraham Lincoln','Motivation'],
+['December 3, 2026','IMG_20251209_100330_093.jpg','May we continue to have these winter evenings that feel like the whole world belongs only to us.','From Zlatko','From Zlatko ♡'],
+['December 4, 2026','IMG_20251210_214536_106.jpg','You are my warmth in every winter. My light in every darkness.','','Love'],
+['December 5, 2026','IMG_20251211_155430_623.jpg','Be the light in someone\'s darkness. You already are — in more lives than you know.','','Motivation'],
+['December 6, 2026','IMG_20251214_142704.jpg','The way you move, the way you teach, the way you lead with joy — you are the finest dance trainer. Don\'t ever doubt that.','From Zlatko','Dance ♡'],
+['December 7, 2026','IMG_20251217_175826.jpg','You are my always and my forever. In every season. In every version of the world.','','Love'],
+['December 8, 2026','IMG_20251217_175827.jpg','Winter is the time for comfort, warmth, and rest. You deserve all three in abundance.','','Motivation'],
+['December 9, 2026','IMG_20251218_191621.jpg','May we continue to make every December feel like the most magical one yet.','From Zlatko','From Zlatko ♡'],
+['December 10, 2026','IMG_20251218_192848.jpg','I fall in love with you again every single day. Every single one.','','Love'],
+['December 11, 2026','IMG-20251212-WA0022.jpg','You are brilliant. You are beautiful. You are brave. Repeat this whenever you forget.','','Motivation'],
+['December 12, 2026','IMG_20251225_210847.jpg','The only person I want to celebrate with at the end of every year is you. Only ever you.','From Zlatko','From Zlatko ♡'],
+['December 13, 2026','IMG_20251226_174846_464.jpg','You are my great love. My one and only. My most extraordinary person.','','Love'],
+['December 14, 2026','IMG-20251226-WA0007.jpg','Per aspera ad astra — Through hardship to the stars. And darling, you were always destined for the stars.','Seneca','Latin'],
+['December 15, 2026','IMG-20251226-WA0036.jpg','May we continue to have those magical winter moments — just us, just quiet, just love.','From Zlatko','From Zlatko ♡'],
+['December 16, 2026','IMG_20251229_221753_992.jpg','You are loved more than you will ever fully know. But I will spend my life trying to show you.','','Love'],
+['December 17, 2026','IMG_20251230_112652.jpg','Fortis fortuna adiuvat — Fortune favors the brave. You are brave. The best things are still ahead.','Terence','Latin'],
+['December 18, 2026','IMG_20251230_114712.jpg','Day 200 of this notebook. Here is what I know with absolute certainty: you are extraordinary.','From Zlatko','From Zlatko ♡'],
+['December 19, 2026','IMG_20251230_115131.jpg','You are the story I will always want to be reading.','','Love'],
+['December 20, 2026','IMG_20251230_115555.jpg','Be at peace with where you are, and wildly excited about where you are going.','','Motivation'],
+['December 21, 2026','IMG_20251230_132029.jpg','The longest night — and the brightest love. May we continue to grow, individually and together, forever.','From Zlatko','From Zlatko ♡'],
+['December 22, 2026','IMG_20251231_130251.jpg','Every day with you is a gift I never want to give back.','','Love'],
+['December 23, 2026','IMG_20251231_140250.jpg','Spread love everywhere you go. Let no one ever come to you without leaving happier.','Mother Teresa','Motivation'],
+['December 24, 2026','IMG-20251230-WA0040.jpg','Christmas Eve with you is my favourite kind of magic. Merry Christmas Eve, my love. ♡','From Zlatko','From Zlatko ♡'],
+['December 25, 2026','IMG-20251230-WA0041.jpg','All I want for Christmas is exactly what I already have. You. Merry Christmas, Asima. ♡','From Zlatko','From Zlatko ♡'],
+['December 26, 2026','IMG-20251230-WA0045.jpg','The Fates weave our story — and I am grateful every single thread leads back to you.','Greek Mythology','Greek'],
+['December 27, 2026','IMG_20251231_140302.jpg','The year is winding down but our love is only just getting started.','From Zlatko','From Zlatko ♡'],
+['December 28, 2026','IMG_20251231_190210.jpg','Here\'s to us — in every year, every season, every chapter, every version of this life.','','Love'],
+['December 29, 2026','IMG_20251231_202620.jpg','Don\'t rush the ending. The best parts are always still ahead.','','Motivation'],
+['December 30, 2026','IMG-20260102-WA0006.jpg','May we continue — in the new year and every year — to be exactly this: in love, together, grateful.','From Zlatko','From Zlatko ♡'],
+['December 31, 2026','IMG-20260102-WA0028.jpg','The last page of this notebook. But our story? That one goes on forever. Happy New Year, my love. I love you endlessly. ♡','From Zlatko — Zlatko','From Zlatko ♡'],
+];
+
+// ── MONTH ──
+const MONTH_MAP = {June:6,July:7,August:8,September:9,October:10,November:11,December:12};
+const MONTH_CLS = {6:'m6',7:'m7',8:'m8',9:'m9',10:'m10',11:'m11',12:'m12'};
+const MONTH_NAMES = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FULL_MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_LIST = [{n:'Jun',m:6},{n:'Jul',m:7},{n:'Aug',m:8},{n:'Sep',m:9},{n:'Oct',m:10},{n:'Nov',m:11},{n:'Dec',m:12}];
+
+function getMonth(i){ return MONTH_MAP[DAYS[i][0].split(' ')[0]] || 6 }
+
+// ── STATE ──
+let cur = 0;
+let calOpen = false;
+
+// ── RENDER ──
+function render(){
+  const [date, photo, quote, attr, badge] = DAYS[cur];
+  const imgEl = document.getElementById('dayImg');
+  const wrap  = document.getElementById('photoWrap');
+
+  // Reset
+  wrap.classList.remove('text-only');
+  imgEl.style.display = '';
+
+  if(photo){
+    imgEl.src = P + photo;
+    imgEl.onerror = ()=>{ wrap.classList.add('text-only') };
+    imgEl.onload  = ()=>{ wrap.classList.remove('text-only') };
+  } else {
+    wrap.classList.add('text-only');
+  }
+
+  document.getElementById('dayDate').textContent  = date;
+  document.getElementById('dayQuote').textContent = quote;
+  document.getElementById('dayAttr').textContent  = attr ? '— ' + attr : '';
+  document.getElementById('quoteBadge').textContent = badge || '';
+  document.getElementById('navNum').textContent   = cur + 1;
+  document.getElementById('prevBtn').disabled = cur === 0;
+  document.getElementById('nextBtn').disabled = cur === DAYS.length - 1;
+
+  const mo = getMonth(cur);
+  document.body.className = MONTH_CLS[mo] || 'm6';
+  document.querySelectorAll('.mpill').forEach(p=>
+    p.classList.toggle('active', parseInt(p.dataset.m) === mo));
+}
+
+function go(dir){
+  const n = cur + dir;
+  if(n < 0 || n >= DAYS.length) return;
+  cur = n;
+  render();
+}
+
+function goToDay(i){ cur=i; render(); toggleCal(); }
+
+// ── MONTH PILLS ──
+function buildMonthPills(){
+  const cont = document.getElementById('monthPills');
+  MONTHS_LIST.forEach(({n,m})=>{
+    const b = document.createElement('button');
+    b.className='mpill'; b.textContent=n; b.dataset.m=m;
+    b.onclick=()=>jumpToMonth(m);
+    cont.appendChild(b);
+  });
+}
+
+function jumpToMonth(m){
+  const i = DAYS.findIndex((_,idx)=>getMonth(idx)===m);
+  if(i>=0){ cur=i; render(); }
+}
+
+// ── CALENDAR ──
+function toggleCal(){
+  calOpen=!calOpen;
+  document.getElementById('calDrawer').classList.toggle('open',calOpen);
+  if(calOpen) buildCal();
+}
+
+function buildCal(){
+  const cont = document.getElementById('calContent');
+  cont.innerHTML='';
+  MONTHS_LIST.forEach(({n,m})=>{
+    const firstIdx = DAYS.findIndex((_,i)=>getMonth(i)===m);
+    const days = new Date(2026,m,0).getDate();
+    const h=document.createElement('div'); h.className='cal-month-title';
+    h.textContent=FULL_MONTHS[m]+' 2026'; cont.appendChild(h);
+    const grid=document.createElement('div'); grid.className='cal-grid';
+    ['S','M','T','W','T','F','S'].forEach(d=>{
+      const c=document.createElement('div'); c.className='cal-hdr'; c.textContent=d; grid.appendChild(c);
+    });
+    const dow=new Date(2026,m-1,1).getDay();
+    for(let i=0;i<dow;i++) grid.appendChild(document.createElement('div'));
+    for(let d=1;d<=days;d++){
+      const idx=firstIdx+d-1;
+      const c=document.createElement('div'); c.className='cal-day';
+      c.textContent=d; if(idx===cur) c.classList.add('selected');
+      c.onclick=()=>goToDay(idx); grid.appendChild(c);
+    }
+    cont.appendChild(grid);
+  });
+}
+
+// ── INIT ──
+function init(){
+  buildMonthPills();
+  const today = new Date();
+  const start = new Date(2026,5,1);
+  const end   = new Date(2026,11,31);
+  if(today >= start && today <= end){
+    const diff = Math.floor((today-start)/(864e5));
+    cur = Math.min(diff, DAYS.length-1);
+  } else {
+    cur = 0;
+  }
+  render();
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('lock').style.opacity==='0'||!document.getElementById('lock').classList.contains('hidden'))return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(-1);
+});
+</script>
+</body>
+</html>
